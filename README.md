@@ -1,159 +1,150 @@
-# Turborepo starter
+# 🐼 PandaDraw
 
-This Turborepo starter is maintained by the Turborepo core team.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-## Using this example
+A real-time collaborative whiteboard built using CRDTs that enables multiple users to draw, edit, and interact on a shared canvas with conflict-free synchronization and eventual consistency.
 
-Run the following command:
+---
 
-```sh
-npx create-turbo@latest
+## 🚀 Overview
+
+PandaDraw is a distributed system designed to replicate and extend the capabilities of tools like Excalidraw, focusing on real-time collaboration over a 2D spatial canvas.
+
+Unlike traditional collaborative editors that operate on linear text, PandaDraw synchronizes a **graph of spatial objects (shapes)** across multiple clients concurrently.
+
+The system ensures:
+- Real-time collaboration
+- Conflict-free merging (CRDT)
+- Offline-first capability
+- Scalable architecture
+
+---
+
+## 🧠 Motivation
+
+Most collaborative systems (e.g., Google Docs clones) deal with linear text, which simplifies synchronization.
+
+PandaDraw intentionally tackles a harder problem:
+
+> Synchronizing complex spatial data structures in real time across distributed clients.
+
+This demonstrates:
+- Advanced distributed systems design
+- Handling concurrent updates on non-linear data
+- Real-world system complexity (similar to Figma/Miro)
+
+---
+
+## 🐼 Why "PandaDraw"?
+
+The name reflects the philosophy of the system:
+
+> PandaDraw hides the complexity of distributed systems behind a simple, intuitive user experience — just like a panda appears calm despite its strength.
+
+---
+
+## ✨ Features
+
+### Core
+- Multi-user real-time collaboration
+- Drawing tools (rectangle, arrow, freehand)
+- Shape manipulation (move, resize, delete)
+- Conflict-free updates using CRDT
+
+### Presence
+- Live cursors
+- Selected shapes
+- Active user tracking
+
+### System
+- WebSocket-based real-time sync
+- Eventual consistency
+- Offline-first support (planned)
+- Snapshot & history system (planned)
+
+---
+
+## 🏗️ High-Level Architecture
+
+PandaDraw follows a **CRDT-first distributed architecture**. For an in-depth dive, see the [Architecture Documentation](ARCHITECTURE.md).
+
+### Components
+
+1. **Frontend (Canvas UI)**
+   - Handles drawing interactions
+   - Renders shapes on canvas
+   - Maintains local CRDT state
+
+2. **CRDT Layer (Yjs)**
+   - Manages shared document state
+   - Ensures conflict-free merging
+   - Generates incremental updates
+
+3. **Sync Layer (WebSocket Server)**
+   - Relays updates between clients
+   - Handles connection lifecycle
+   - Broadcasts CRDT updates
+
+4. **Persistence Layer**
+   - Stores snapshots of canvas state
+   - Logs incremental updates
+   - Enables recovery & versioning
+
+5. **Presence Layer**
+   - Tracks cursor positions
+   - Tracks selections and active users
+   - Uses ephemeral state (not persisted)
+
+---
+
+## 🔄 Real-Time Synchronization Flow
+
+1. User performs an action (draw/move/edit shape)
+2. Local CRDT state (Yjs) updates instantly
+3. Yjs generates an incremental update
+4. Update is sent via WebSocket to server
+5. Server broadcasts update to other clients
+6. All clients merge update automatically
+
+### Key Property
+
+> No central conflict resolution logic is required — CRDT guarantees convergence.
+
+---
+
+## 🗃️ Data Model
+
+### Canvas Representation
+
+The core data structure is managed by Yjs. Shapes are stored as a map of objects.
+
+```ts
+Y.Map<shapeId, Shape>
 ```
 
-## What's inside?
+A `Shape` object structure:
 
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```ts
+interface Shape {
+  id: string; // Unique shape identifier
+  type: 'rectangle' | 'ellipse' | 'arrow' | 'freedraw' | 'text';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  strokeColor: string;
+  backgroundColor: string;
+  isDeleted: boolean; // Tombstone for eventual consistency
+}
 ```
 
-Without global `turbo`, use your package manager:
+---
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
-```
+## 🛠️ Getting Started
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+To get the project running locally, please follow the detailed instructions in our [Getting Started Guide](GETTING_STARTED.md).
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## 📄 License
 
-```sh
-turbo build --filter=docs
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+This project is licensed under the MIT License - see the LICENSE file for details.g
