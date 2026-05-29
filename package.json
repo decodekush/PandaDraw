@@ -1,5 +1,5 @@
 {
-  "name": "PandaDraw",
+  "name": "pandadraw",
   "private": true,
   "scripts": {
     "build": "turbo run build",
